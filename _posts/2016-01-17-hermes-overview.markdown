@@ -2,10 +2,15 @@
 layout: post
 title:  "An Overview of Hermes"
 date:   2016-01-17 13:02:26
-categories: NLP hermes updates
+categories: NLP hermes
 ---
 
-Hermes is a Natural Language Processing (NLP) framework written in Java that makes it easy to create, add, and process linguistic annotations on text documents.
+Hermes is a Natural Language Processing framework for Java inspired by the Tipster Architecture and TextBlob. Hermes focuses on simplifying the development and use of NLP technologies by providing a framework to quickly access and construct linguistic annotations on documents using multiple cores or multiple machines (using Apache Spark). At the core of Hermes is the HString which acts like a Java string on steroids.
+
+The core Hermes package provides modules for tokenization, sentence segmentation, part-of-speech tagging, shallow parsing, named entity recognition, dependency parsing, lexicon matching, and a rule-based extraction framework. 
+
+Quickstart Example
+----------------------
 
 {% highlight java %}
 //Initializes configuration settings
