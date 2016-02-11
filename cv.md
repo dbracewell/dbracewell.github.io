@@ -7,6 +7,7 @@ permalink: /cv/
 
 Education
 ===============================================================================
+
 The University of Tokushima, Tokushima, Japan
 -------------------------------------------------------------------------------
 *Doctor of Philosophy, Information Science and System Engineering*, *2007*
@@ -25,6 +26,7 @@ Seminole Community College, Sanford, FL
 
 Work Experience
 ===============================================================================
+
 Oculus360, Addison, TX
 -------------------------------------------------------------------------------
 *Senior Data Scientist*, *July, 2014 - Present*
@@ -73,6 +75,7 @@ The University of Central Florida, Orlando, FL
 
 Related Teaching Experience
 ===============================================================================
+
 The University of Tokushima
 -------------------------------------------------------------------------------
 *Lecturer,* *April, 2005 - October, 2007*
