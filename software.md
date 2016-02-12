@@ -4,14 +4,8 @@ title: Software
 permalink: /software/
 ---
 
-![Hermes](https://raw.githubusercontent.com/dbracewell/hermes/gh-pages/images/hermes.png)
+[![Hermes](https://raw.githubusercontent.com/dbracewell/hermes/gh-pages/images/hermes.png)](https://github.com/dbracewell/hermes)
 
-[Hermes NLP](https://github.com/dbracewell/hermes)
+[![Apollo](https://raw.githubusercontent.com/dbracewell/apollo/gh-pages/images/apollo.png)](https://github.com/dbracewell/apollo)
 
-![Apollo](https://raw.githubusercontent.com/dbracewell/apollo/gh-pages/images/apollo.png)
-
-[Apollo ML](https://github.com/dbracewell/apollo)
-
-![Mango](https://raw.githubusercontent.com/dbracewell/mango/gh-pages/images/mango.png)
-
-[Mango](https://github.com/dbracewell/mango)
+[![Mango](https://raw.githubusercontent.com/dbracewell/mango/gh-pages/images/mango.png)](https://github.com/dbracewell/mango)
