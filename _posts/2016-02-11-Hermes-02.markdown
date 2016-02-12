@@ -2,7 +2,7 @@
 layout: post
 title:  "Hermes 0.2"
 date:   2016-02-11 10:25:26
-categories: Hermes NLP
+categories: NLP Hermes
 ---
 
 Hermes 0.2 is almost ready for release. Key additions will be the integration of Apollo for machine learning, a part-of-speech tagger, shallow parser, WordNet interface and annotator, and numerous improvements and bug fixes. Modules have been refactored to move malt parser into core. Informal benchmarking on an i7 shows ~40K words per second for tokenization, sentence segmentation, part-of-speech tagging, and dependency parsing. More improvements to come!
