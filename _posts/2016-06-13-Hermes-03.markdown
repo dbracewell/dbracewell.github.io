@@ -1,0 +1,8 @@
+---
+layout: post
+title:  "Hermes 0.3"
+date:   2016-06-13 10:25:26
+categories: NLP Hermes
+---
+
+Hermes 0.3 has been released. This version brings a unified interface to annotations, attributes, and relations, lots of bug fixes, and most importantly an almost usable user guide.
