@@ -31,6 +31,8 @@ Oculus360, Addison, TX
 -------------------------------------------------------------------------------
 *VP of Technology*, *July, 2014 - Present*
 
+- Oculus360's market intelligence platform is a suite of adaptive, integrated solutions that provide foresight and insights unearthed from contextual consumer behaviour and consumer perceptions. As Senior Data Scientist I lead our efforts in the area of large scale Natural Language Processing and Psycholinguistics to provide insights to our customers. 
+
 Richland College, Dallas, TX
 -------------------------------------------------------------------------------
 *Adjunct Faculty*, *August, 2013 - Present*
