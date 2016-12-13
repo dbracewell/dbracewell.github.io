@@ -29,7 +29,7 @@ Work Experience
 
 Oculus360, Addison, TX
 -------------------------------------------------------------------------------
-*Senior Data Scientist*, *July, 2014 - Present*
+*VP of Technology*, *July, 2014 - Present*
 
 Richland College, Dallas, TX
 -------------------------------------------------------------------------------
