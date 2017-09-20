@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "NLP and Consumer Insights"
-date:   2017-08-19 13:02:26
+date:   2017-09-19 13:02:26
 categories: NLP marketing consumer insights
 ---
 Social media provides a medium for consumers to rant, rave, and recommend products, brands, and services. This digital voice of the customer provides brands, and the agencies serving them, insights into the when, where, how, and why products are used, who is buying them, who is using them, and information about those individuals including their associated beliefs, needs, wants, and preferences. These insights facilitate understanding of consumer behavior, which can allow brands to better build, design, and market their products and services to meet consumers' needs and desires.  Given that the majority of the consumer conversation is textual in nature (e.g. product reviews, tweets, Facebook posts, etc.), Natural Language Processing along with Machine Learning and, in more general, Artificial Intelligence are now critical components in gaining a 360 degree view of consumers.
