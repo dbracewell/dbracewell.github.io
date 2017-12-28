@@ -24,7 +24,7 @@ The University of Central Florida, Orlando, FL
 Work Experience
 ===============================================================================
 
-Grubhub, Richardson, TX
+Grubhub, New York, NY (Remote)
 -------------------------------------------------------------------------------
 *Data Scientist - Team Lead*, *November, 2017 - Present*
 
