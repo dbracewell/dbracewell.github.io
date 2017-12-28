@@ -27,13 +27,17 @@ Seminole Community College, Sanford, FL
 Work Experience
 ===============================================================================
 
+Grubhub, Richardson, TX
+-------------------------------------------------------------------------------
+*Data Scientist - Team Lead*, *November, 2017 - Present*
+
 Oculus360, Addison, TX
 -------------------------------------------------------------------------------
-*Senior Data Scientist*, *July, 2014 - Present*
+*Senior Data Scientist*, *July, 2014 - November, 2017*
 
 Richland College, Dallas, TX
 -------------------------------------------------------------------------------
-*Adjunct Faculty*, *August, 2013 - Present*
+*Adjunct Faculty*, *August, 2013 - June, 205*
 
 - Taught COSC 1301 Introduction to Computers.
 
