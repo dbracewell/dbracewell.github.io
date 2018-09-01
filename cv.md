@@ -1,7 +1,7 @@
 ---
 layout: page
 custom_css: cv
-title: CV
+title: Resume
 permalink: /cv/
 ---
 
