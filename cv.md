@@ -12,6 +12,7 @@ Proven researcher and developer with over 17 years experience and 75 published p
 
 Education
 ===============================================================================
+
 The University of Tokushima, Tokushima, Japan
 -------------------------------------------------------------------------------
 *Doctor of Philosophy, Information Science and System Engineering* 
@@ -29,6 +30,7 @@ The University of Central Florida, Orlando, FL
 
 Work Experience
 ===============================================================================
+
 Grubhub, New York, NY (Remote)
 -------------------------------------------------------------------------------
 *Data Scientist Team Lead*, *2017 - Present*
