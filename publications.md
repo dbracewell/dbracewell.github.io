@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Publications
+title: David B. Bracewell
 ---
 
 1. Bracewell, David B., (2015), A Four-Factor Model for Mining Consumer Insights in Social Data,  Proceedings of the 28th International FLAIRS Conference

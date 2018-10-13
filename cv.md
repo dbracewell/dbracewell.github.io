@@ -31,9 +31,15 @@ The University of Central Florida, Orlando, FL
 Work Experience
 ===============================================================================
 
+Language Computer Corporation, Richardson, TX
+-------------------------------------------------------------------------------
+*Principal Scientist,* *2018 - Present*
+
+*Technologies Used*: Java, Hadoop, Python, Pandas, Tensorflow, Keras
+
 Grubhub, New York, NY (Remote)
 -------------------------------------------------------------------------------
-*Data Scientist Team Lead*, *2017 - Present*
+*Data Scientist Team Lead*, *2017 - 2018*
 
 - Lead the NLP and taxonomy team to normalize and categorize menu items, dishes, and restaurants to improve customer experience when searching and discovering restaurants and cuisines on Grubhub.
 
