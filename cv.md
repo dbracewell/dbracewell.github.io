@@ -35,7 +35,33 @@ Language Computer Corporation, Richardson, TX
 -------------------------------------------------------------------------------
 *Principal Scientist,* *2018 - Present*
 
-*Technologies Used*: Java, Hadoop, Python, Pandas, Tensorflow, Keras
+*Hands-on Principal Researcher who has led and contributed to multiple government funded projects (e.g. DARPA, SOCOM, and NAVY).*
+
+- Developed a deep learning model to automatically determine and fill relevant Wikipedia-style infobox elements for entities and events.
+- Developed technology to extract relations between individuals discussed in a corpus and the corresponding polarity (positive, negative, or neutral) of the relation based on the effect the event has on the participants.
+- Developed a deep learning model for determining if a piece of content is biased or not in its reporting of facts.
+
+*Technologies Used*: Java, Hadoop, Python, Pandas, Tensorflow, Keras, Apache Spark, Apache Kafka, JanusGraph, SQL
+
+Colorado Technical University, Online
+-------------------------------------------------------------------------------
+*Adjunct Faculty,* *2018 - Present*
+
+*Assistant Professor teaching undergraduate and graduate courses in Computer Science.*
+
+*Undergraduate Courses Taught:*
+
+- CS101 Problem Solving in Computer Science
+- CS118 Principles of Programming Languages
+- CS219 Python Programming
+- CS226 Java Programming
+- IT351 Advanced Java Programming
+- SWE400 Software Construction
+
+*Graduate Courses Taught:*
+
+- CS686 Fundamentals of Big Data Analytics
+- CS692 Algorithms for Data Science
 
 Grubhub, New York, NY (Remote)
 -------------------------------------------------------------------------------
@@ -47,6 +73,10 @@ Grubhub, New York, NY (Remote)
 
 Oculus360, Addison, TX
 -------------------------------------------------------------------------------
+*Data Science Consultant*, *2017 - Present*
+
+- Design new algorithms and research direction for the Data Science team.
+
 *Vice President of Technology*, *2014 - 2017*
 
 - Led, designed, and implemented the Machine Learning, Natural Language Processing, and Psycholinguistics algorithms driving Oculus360's consumer analytic platform, which  provides deep insights about consumers needs, wants, and desires. 
