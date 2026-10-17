@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Current Time</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 100px;
+      font-size: 12em;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="clock">Loading time...</div>
+
+  <script>
+    function updateTime() {
+      const now = new Date();
+      const timeString = now.toLocaleTimeString(); // e.g., "2:14:30 PM"
+      document.getElementById('clock').textContent = timeString;
+    }
+
+    // Update immediately and then every second
+    updateTime();
+    setInterval(updateTime, 1000);
+  </script>
+
+</body>
+</html>
