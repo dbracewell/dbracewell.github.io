@@ -1,0 +1,2396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Hiragana Jam — Spaced Repetition Slide Guitar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&family=Outfit:wght@500;700;900&family=Righteous&display=swap" rel="stylesheet" />
+
+  <!-- === SECTION: STYLES === -->
+  <style>
+    :root {
+      --bg-deep: #090714;
+      --bg-stage: #120d29;
+      --panel-bg: rgba(20, 15, 45, 0.85);
+      --panel-border: rgba(255, 255, 255, 0.14);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent-gold: #fbbf24;
+      --accent-neon: #f43f5e;
+
+      /* 4 Guitar Fret Lanes */
+      --lane-0: #10b981;
+      --lane-0-glow: rgba(16, 185, 129, 0.55);
+      --lane-1: #f43f5e;
+      --lane-1-glow: rgba(244, 63, 94, 0.55);
+      --lane-2: #f59e0b;
+      --lane-2-glow: rgba(245, 158, 11, 0.55);
+      --lane-3: #3b82f6;
+      --lane-3-glow: rgba(59, 130, 246, 0.55);
+
+      --target-size: 24px;
+      --font-display: "Righteous", "Outfit", sans-serif;
+      --font-ui: "Outfit", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-kana: "Noto Sans JP", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
+    }
+
+    @media (pointer: coarse) {
+      :root {
+        --target-size: 44px;
+      }
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      block-size: 100%;
+      background-color: var(--bg-deep);
+      color: var(--text-main);
+      font-family: var(--font-ui);
+      overflow-wrap: break-word;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    :where(button, [role="button"]) {
+      min-block-size: var(--target-size);
+      min-inline-size: var(--target-size);
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* Main 100dvh App Stage */
+    .app-stage {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      block-size: 100dvh;
+      max-inline-size: 100%;
+      padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+      padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+      padding-left: max(0.75rem, env(safe-area-inset-left, 0px));
+      padding-right: max(0.75rem, env(safe-area-inset-right, 0px));
+      background-image:
+        linear-gradient(180deg, rgba(9, 7, 20, 0.72) 0%, rgba(18, 12, 42, 0.52) 50%, rgba(9, 6, 20, 0.88) 100%),
+        url("assets/stage-bg.png"),
+        radial-gradient(circle at 50% 18%, rgba(244, 63, 94, 0.22), transparent 55%),
+        radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.18), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(16, 185, 129, 0.16), transparent 50%),
+        linear-gradient(180deg, #0b0719 0%, #160e33 55%, #090614 100%);
+      background-size: cover, cover, auto, auto, auto, auto;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Top HUD Header */
+    .hud-header {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0.75rem;
+      max-inline-size: 68rem;
+      inline-size: 100%;
+      margin-inline: auto;
+      z-index: 20;
+    }
+
+    .hud-brand-stats {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.65rem;
+    }
+
+    .brand-identity {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-logo-badge {
+      inline-size: 2.35rem;
+      block-size: 2.35rem;
+      aspect-ratio: 1 / 1;
+      border-radius: 0.55rem;
+      border: 1px solid rgba(251, 191, 36, 0.6);
+      box-shadow: 0 0 14px rgba(244, 63, 94, 0.45);
+      object-fit: cover;
+      background: radial-gradient(circle, #1e1b4b, #090714);
+    }
+
+    .brand-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.1rem, 0.85rem + 1.2vw, 1.65rem);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #fff 0%, #fbbf24 55%, #f43f5e 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 18px rgba(244, 63, 94, 0.35);
+      text-wrap: balance;
+    }
+
+    .stat-pill {
+      display: flex;
+      flex-direction: column;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 0.65rem;
+      padding: 0.3rem 0.65rem;
+      backdrop-filter: blur(8px);
+      min-inline-size: 4.5rem;
+    }
+
+    .stat-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: clamp(0.95rem, 0.8rem + 0.6vw, 1.3rem);
+      color: var(--text-main);
+    }
+
+    .stat-value.combo-highlight {
+      color: var(--accent-gold);
+    }
+
+    /* Center Target Romaji Prompt Card */
+    .romaji-prompt-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(180deg, rgba(30, 22, 68, 0.95), rgba(15, 11, 36, 0.95));
+      border: 2px solid rgba(251, 191, 36, 0.65);
+      border-radius: 1rem;
+      padding: 0.35rem 1.35rem;
+      box-shadow:
+        0 0 25px rgba(251, 191, 36, 0.25),
+        inset 0 0 12px rgba(251, 191, 36, 0.15);
+      min-inline-size: 8.5rem;
+      text-align: center;
+    }
+
+    .prompt-sub {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--accent-gold);
+    }
+
+    .prompt-romaji {
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 1.1rem + 2.2vw, 2.75rem);
+      line-height: 1.05;
+      color: #ffffff;
+      letter-spacing: 0.06em;
+      text-shadow: 0 0 16px rgba(251, 191, 36, 0.65);
+    }
+
+    .prompt-speed-badge {
+      margin-top: 0.15rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.35);
+      border-radius: 999px;
+      padding: 0.08rem 0.55rem;
+    }
+
+    /* Right HUD Controls & Rock Meter */
+    .hud-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    .rock-meter-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+      background: var(--panel-bg);
+      border: 1px solid var(--panel-border);
+      border-radius: 0.65rem;
+      padding: 0.35rem 0.65rem;
+      min-inline-size: 6.5rem;
+    }
+
+    .rock-meter-bar {
+       inline-size: 100%;
+      block-size: 0.5rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .rock-meter-fill {
+      inline-size: 75%;
+      block-size: 100%;
+      background: linear-gradient(90deg, #f43f5e 0%, #fbbf24 50%, #10b981 100%);
+      border-radius: 999px;
+      transition: inline-size 0.25s ease;
+    }
+
+    .hud-btn {
+      background: rgba(30, 23, 62, 0.9);
+      color: var(--text-main);
+      border: 1px solid var(--panel-border);
+      border-radius: 0.6rem;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: transform 0.12s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .hud-btn:hover {
+      border-color: var(--accent-gold);
+      background: rgba(45, 34, 90, 0.95);
+    }
+
+    .hud-btn.primary {
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+      border-color: rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 14px rgba(244, 63, 94, 0.4);
+    }
+
+    /* Center Stage & 3D Perspective Guitar Highway */
+    .highway-stage {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      inline-size: 100%;
+      block-size: 100%;
+      perspective: 650px;
+      overflow: hidden;
+    }
+
+    .fretboard-highway {
+      position: relative;
+      inline-size: min(92vw, 34rem);
+      block-size: 96%;
+      background-image:
+        linear-gradient(180deg, rgba(10, 6, 18, 0.45) 0%, rgba(16, 10, 24, 0.25) 100%),
+        url("assets/fretboard-wood.png"),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, rgba(36, 22, 14, 0.88) 15%, rgba(48, 30, 18, 0.92) 50%, rgba(36, 22, 14, 0.88) 85%, rgba(0, 0, 0, 0.55) 100%);
+      background-size: 100% 100%, cover, 100% 100%;
+      background-position: center;
+      border-left: 4px solid #fbbf24;
+      border-right: 4px solid #fbbf24;
+      box-shadow:
+        0 0 50px rgba(0, 0, 0, 0.9),
+        0 0 28px rgba(244, 63, 94, 0.2);
+      transform: rotateX(24deg);
+      transform-origin: 50% 100%;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      overflow: hidden;
+    }
+
+    /* Moving horizontal fret wires */
+    .fret-wires {
+      position: absolute;
+      inset: 0;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 68px,
+        rgba(226, 232, 240, 0.22) 68px,
+        rgba(255, 255, 255, 0.42) 71px
+      );
+      background-size: 100% 71px;
+      animation: fretScroll 1.2s linear infinite;
+      animation-play-state: paused;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .fret-wires.is-running {
+      animation-play-state: running;
+    }
+
+    @keyframes fretScroll {
+      from {
+        background-position-y: 0px;
+      }
+      to {
+        background-position-y: 71px;
+      }
+    }
+
+    /* Fretboard Pearl Inlay Dots */
+    .fret-inlays {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.22;
+    }
+
+    .inlay-diamond {
+      inline-size: 1.1rem;
+      block-size: 1.1rem;
+      background: radial-gradient(circle, #ffffff 0%, #cbd5e1 100%);
+      transform: rotate(45deg);
+      border-radius: 3px;
+    }
+
+    /* Individual Guitar Lanes */
+    .guitar-lane {
+      position: relative;
+      block-size: 100%;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .guitar-lane:last-child {
+      border-right: none;
+    }
+
+    /* Glowing Guitar String Down the Center of Each Lane */
+    .guitar-string {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      inline-size: 3px;
+      border-radius: 999px;
+      opacity: 0.7;
+      pointer-events: none;
+    }
+
+    .guitar-lane[data-lane="0"] .guitar-string {
+      background: var(--lane-0);
+      box-shadow: 0 0 10px var(--lane-0);
+    }
+    .guitar-lane[data-lane="1"] .guitar-string {
+      background: var(--lane-1);
+      box-shadow: 0 0 10px var(--lane-1);
+    }
+    .guitar-lane[data-lane="2"] .guitar-string {
+      background: var(--lane-2);
+      box-shadow: 0 0 10px var(--lane-2);
+    }
+    .guitar-lane[data-lane="3"] .guitar-string {
+      background: var(--lane-3);
+      box-shadow: 0 0 10px var(--lane-3);
+    }
+
+    /* Glowing Strike Zone Bar near the bottom of the fretboard */
+    .strike-zone {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 82%;
+      block-size: 11%;
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.04) 0%,
+        rgba(251, 191, 36, 0.22) 50%,
+        rgba(255, 255, 255, 0.04) 100%
+      );
+      border-top: 2px solid rgba(251, 191, 36, 0.8);
+      border-bottom: 2px solid rgba(251, 191, 36, 0.8);
+      box-shadow: 0 0 22px rgba(251, 191, 36, 0.35);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: center;
+      justify-items: center;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .strike-ring {
+      inline-size: 3.4rem;
+      block-size: 2.1rem;
+      border-radius: 999px;
+      border: 3px solid rgba(255, 255, 255, 0.45);
+      box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.25);
+    }
+
+    .strike-ring[data-lane="0"] { border-color: var(--lane-0); box-shadow: 0 0 12px var(--lane-0-glow); }
+    .strike-ring[data-lane="1"] { border-color: var(--lane-1); box-shadow: 0 0 12px var(--lane-1-glow); }
+    .strike-ring[data-lane="2"] { border-color: var(--lane-2); box-shadow: 0 0 12px var(--lane-2-glow); }
+    .strike-ring[data-lane="3"] { border-color: var(--lane-3); box-shadow: 0 0 12px var(--lane-3-glow); }
+
+    /* Sliding Hiragana Note Puck */
+    .hiragana-note {
+      position: absolute;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      inline-size: clamp(3.3rem, 8vw, 4.4rem);
+      block-size: clamp(3.3rem, 8vw, 4.4rem);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-kana);
+      font-size: clamp(1.5rem, 3.8vw, 2.05rem);
+      font-weight: 900;
+      color: #ffffff;
+      background: radial-gradient(circle at 32% 30%, #334155, #0f172a 75%);
+      border: 3px solid #ffffff;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.65);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .guitar-lane[data-lane="0"] .hiragana-note {
+      border-color: var(--lane-0);
+      box-shadow: 0 0 16px var(--lane-0-glow), inset 0 0 10px var(--lane-0-glow);
+    }
+    .guitar-lane[data-lane="1"] .hiragana-note {
+      border-color: var(--lane-1);
+      box-shadow: 0 0 16px var(--lane-1-glow), inset 0 0 10px var(--lane-1-glow);
+    }
+    .guitar-lane[data-lane="2"] .hiragana-note {
+      border-color: var(--lane-2);
+      box-shadow: 0 0 16px var(--lane-2-glow), inset 0 0 10px var(--lane-2-glow);
+    }
+    .guitar-lane[data-lane="3"] .hiragana-note {
+      border-color: var(--lane-3);
+      box-shadow: 0 0 16px var(--lane-3-glow), inset 0 0 10px var(--lane-3-glow);
+    }
+
+    /* Note Resolution Visual States (Hit / Wrong / Reveal Correct) */
+    .hiragana-note.is-hit {
+      transform: translate(-50%, -50%) scale(1.28);
+      background: radial-gradient(circle, #fbbf24 0%, #10b981 80%) !important;
+      border-color: #ffffff !important;
+      box-shadow: 0 0 32px #fbbf24, 0 0 16px #ffffff !important;
+      transition: transform 0.16s ease-out, opacity 0.16s ease-out;
+    }
+
+    .hiragana-note.is-wrong {
+      transform: translate(-50%, -50%) scale(0.9);
+      background: radial-gradient(circle, #ef4444 0%, #7f1d1d 85%) !important;
+      border-color: #ef4444 !important;
+      box-shadow: 0 0 28px rgba(239, 68, 68, 0.9) !important;
+    }
+
+    .hiragana-note.is-correct-reveal {
+      transform: translate(-50%, -50%) scale(1.22);
+      background: radial-gradient(circle, #10b981 0%, #065f46 85%) !important;
+      border-color: #fbbf24 !important;
+      box-shadow: 0 0 30px #fbbf24, 0 0 18px #10b981 !important;
+      z-index: 10;
+    }
+
+    .guitar-lane.lane-hit-flash::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 20%, rgba(251, 191, 36, 0.28) 85%, rgba(255, 255, 255, 0.45) 100%);
+      pointer-events: none;
+      animation: laneFlashFade 0.24s ease-out forwards;
+    }
+
+    @keyframes laneFlashFade {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
+
+    /* High-Speed Fiery Rim & Speed Trail for Fast Notes (>= 1.75x) */
+    .hiragana-note.is-fast-note {
+      border-color: #fbbf24 !important;
+      box-shadow:
+        0 0 22px #f43f5e,
+        0 0 12px #fbbf24,
+        inset 0 0 12px rgba(251, 191, 36, 0.75) !important;
+    }
+
+    .hiragana-note.is-fast-note::before {
+      content: "";
+      position: absolute;
+      left: 16%;
+      right: 16%;
+      bottom: 88%;
+      block-size: 3.4rem;
+      background: linear-gradient(
+        to top,
+        rgba(251, 191, 36, 0.75) 0%,
+        rgba(244, 63, 94, 0.45) 55%,
+        transparent 100%
+      );
+      border-radius: 999px;
+      filter: blur(2px);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Overdrive / Star Power Highway Glow (10x and 25x Combo Tiers) */
+    .fretboard-highway.is-overdrive {
+      border-left-color: #38bdf8;
+      border-right-color: #38bdf8;
+      box-shadow:
+        0 0 60px rgba(56, 189, 248, 0.65),
+        0 0 32px rgba(251, 191, 36, 0.45),
+        inset 0 0 35px rgba(56, 189, 248, 0.25);
+    }
+
+    .fretboard-highway.is-super-overdrive {
+      border-left-color: #f43f5e;
+      border-right-color: #fbbf24;
+      box-shadow:
+        0 0 75px rgba(244, 63, 94, 0.8),
+        0 0 42px rgba(251, 191, 36, 0.75),
+        inset 0 0 45px rgba(244, 63, 94, 0.32);
+    }
+
+    /* Strike Zone Particle / Flame Burst */
+    .strike-ring {
+      position: relative;
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+
+    .strike-ring.is-flame-burst {
+      transform: scale(1.38);
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(251, 191, 36, 0.75) 50%, transparent 100%);
+      box-shadow: 0 0 30px #fbbf24, 0 0 18px #ffffff !important;
+    }
+
+    .strike-ring.is-flame-burst::after {
+      content: "🔥";
+      position: absolute;
+      left: 50%;
+      top: -1.1rem;
+      transform: translateX(-50%);
+      font-size: 1.45rem;
+      animation: flameRise 0.38s ease-out forwards;
+      pointer-events: none;
+    }
+
+    @keyframes flameRise {
+      0% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(0.85);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-1.5rem) scale(1.35);
+      }
+    }
+
+    /* Floating Judgment Popup Banner at the Strike Zone */
+    .judgment-popup {
+      position: absolute;
+      left: 50%;
+      bottom: 20%;
+      transform: translateX(-50%) scale(0.9);
+      padding: 0.35rem 1.05rem;
+      border-radius: 999px;
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 0.85rem + 1vw, 1.5rem);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #ffffff;
+      background: rgba(15, 23, 42, 0.92);
+      border: 2px solid #fbbf24;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.75);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 30;
+      white-space: nowrap;
+    }
+
+    .judgment-popup.is-active {
+      animation: judgmentPop 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .judgment-popup[data-type="perfect"] {
+      border-color: #fbbf24;
+      color: #fef08a;
+      text-shadow: 0 0 14px rgba(251, 191, 36, 0.8);
+      box-shadow: 0 0 26px rgba(251, 191, 36, 0.45);
+    }
+
+    .judgment-popup[data-type="good"] {
+      border-color: #10b981;
+      color: #a7f3d0;
+      text-shadow: 0 0 12px rgba(16, 185, 129, 0.7);
+      box-shadow: 0 0 22px rgba(16, 185, 129, 0.35);
+    }
+
+    .judgment-popup[data-type="miss"] {
+      border-color: #ef4444;
+      color: #fecaca;
+      text-shadow: 0 0 12px rgba(239, 68, 68, 0.75);
+      box-shadow: 0 0 24px rgba(239, 68, 68, 0.45);
+    }
+
+    @keyframes judgmentPop {
+      0% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(0.4rem) scale(0.8);
+      }
+      22% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-0.35rem) scale(1.06);
+      }
+      80% {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-0.65rem) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-0.95rem) scale(0.95);
+      }
+    }
+
+    /* Bottom Fret Buttons Bar (Keyboard + Mouse/Touch) */
+    .fret-buttons-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.6rem;
+      inline-size: min(94vw, 35rem);
+      margin-inline: auto;
+      padding-top: 0.45rem;
+      z-index: 20;
+    }
+
+    .fret-btn {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.55rem 0.4rem;
+      border-radius: 0.85rem;
+      border: 2px solid rgba(255, 255, 255, 0.25);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-main);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+      touch-action: manipulation;
+    }
+
+    .fret-btn[data-lane="0"] {
+      border-color: var(--lane-0);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.25);
+    }
+    .fret-btn[data-lane="1"] {
+      border-color: var(--lane-1);
+      box-shadow: 0 0 12px rgba(244, 63, 94, 0.25);
+    }
+    .fret-btn[data-lane="2"] {
+      border-color: var(--lane-2);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.25);
+    }
+    .fret-btn[data-lane="3"] {
+      border-color: var(--lane-3);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+    }
+
+    .fret-btn:active,
+    .fret-btn.is-pressed {
+      transform: translateY(2px) scale(0.97);
+    }
+
+    .fret-btn[data-lane="0"]:active,
+    .fret-btn[data-lane="0"].is-pressed {
+      background: rgba(16, 185, 129, 0.32);
+      box-shadow: 0 0 22px var(--lane-0);
+    }
+    .fret-btn[data-lane="1"]:active,
+    .fret-btn[data-lane="1"].is-pressed {
+      background: rgba(244, 63, 94, 0.32);
+      box-shadow: 0 0 22px var(--lane-1);
+    }
+    .fret-btn[data-lane="2"]:active,
+    .fret-btn[data-lane="2"].is-pressed {
+      background: rgba(245, 158, 11, 0.32);
+      box-shadow: 0 0 22px var(--lane-2);
+    }
+    .fret-btn[data-lane="3"]:active,
+    .fret-btn[data-lane="3"].is-pressed {
+      background: rgba(59, 130, 246, 0.32);
+      box-shadow: 0 0 22px var(--lane-3);
+    }
+
+    .fret-key-label {
+      font-family: var(--font-display);
+      font-size: clamp(1rem, 0.85rem + 0.6vw, 1.35rem);
+      line-height: 1.1;
+    }
+
+    .fret-sub-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    /* Compact Mobile Header Adjustments */
+    @media (max-width: 680px) {
+      .hud-header {
+        grid-template-columns: 1fr 1fr;
+        grid-template-areas:
+          "prompt prompt"
+          "stats controls";
+        gap: 0.45rem;
+      }
+
+      .hud-brand-stats {
+        grid-area: stats;
+      }
+
+      .romaji-prompt-card {
+        grid-area: prompt;
+        flex-direction: row;
+        gap: 0.85rem;
+        padding: 0.3rem 1rem;
+      }
+
+      .hud-controls {
+        grid-area: controls;
+      }
+
+      .brand-title {
+        display: none;
+      }
+    }
+
+    /* Native Modal Dialogs & Mastery Heatmap Drawer */
+    dialog:modal {
+      overscroll-behavior: contain;
+    }
+
+    dialog::backdrop {
+      background-color: rgba(6, 4, 15, 0.78);
+      backdrop-filter: blur(6px);
+      overflow: hidden;
+      overscroll-behavior: contain;
+    }
+
+    .jam-dialog {
+      margin: auto;
+      inline-size: min(94vw, 54rem);
+      max-block-size: min(88dvh, 48rem);
+      background: linear-gradient(180deg, #171136 0%, #0d0920 100%);
+      color: var(--text-main);
+      border: 1px solid rgba(251, 191, 36, 0.45);
+      border-radius: 1.15rem;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), 0 0 32px rgba(244, 63, 94, 0.2);
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .jam-dialog[open] {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--panel-border);
+      background: rgba(10, 7, 24, 0.65);
+    }
+
+    .dialog-title {
+      font-family: var(--font-display);
+      font-size: clamp(1.15rem, 1rem + 0.8vw, 1.5rem);
+      color: var(--accent-gold);
+      text-wrap: balance;
+    }
+
+    .dialog-body {
+      padding: 1rem 1.25rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .dialog-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.85rem 1.25rem;
+      border-top: 1px solid var(--panel-border);
+      background: rgba(10, 7, 24, 0.65);
+    }
+
+    .mastery-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .legend-dot {
+      inline-size: 0.6rem;
+      block-size: 0.6rem;
+      border-radius: 50%;
+    }
+
+    .gojuon-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .gojuon-row {
+      display: grid;
+      grid-template-columns: 7.5rem repeat(5, minmax(0, 1fr));
+      gap: 0.45rem;
+      align-items: stretch;
+    }
+
+    .gojuon-row-label {
+      display: flex;
+      align-items: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding-right: 0.35rem;
+    }
+
+    .kana-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.45rem 0.3rem;
+      border-radius: 0.65rem;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: rgba(30, 41, 59, 0.55);
+      text-align: center;
+      gap: 0.1rem;
+    }
+
+    /* Mastery Tier Color Coding */
+    .kana-tile[data-tier="unseen"] {
+      background: rgba(30, 41, 59, 0.45);
+      border-color: rgba(148, 163, 184, 0.22);
+      color: #cbd5e1;
+    }
+
+    .kana-tile[data-tier="learning"] {
+      background: rgba(37, 99, 235, 0.22);
+      border-color: rgba(59, 130, 246, 0.65);
+      box-shadow: inset 0 0 10px rgba(59, 130, 246, 0.2);
+    }
+
+    .kana-tile[data-tier="familiar"] {
+      background: rgba(16, 185, 129, 0.22);
+      border-color: rgba(16, 185, 129, 0.7);
+      box-shadow: inset 0 0 12px rgba(16, 185, 129, 0.22);
+    }
+
+    .kana-tile[data-tier="mastered"] {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.28), rgba(244, 63, 94, 0.25));
+      border-color: #fbbf24;
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.3), inset 0 0 10px rgba(251, 191, 36, 0.25);
+    }
+
+    .kana-tile-char {
+      font-family: var(--font-kana);
+      font-size: 1.35rem;
+      font-weight: 900;
+      line-height: 1.1;
+    }
+
+    .kana-tile-romaji {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+    }
+
+    .kana-tile-meta {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+    }
+
+    .hud-btn.danger {
+      background: rgba(127, 29, 29, 0.75);
+      border-color: rgba(248, 113, 113, 0.45);
+      color: #fecaca;
+    }
+
+    .hud-btn.danger:hover {
+      background: rgba(153, 27, 27, 0.9);
+      border-color: #f87171;
+    }
+
+    .reset-confirm-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      visibility: hidden;
+    }
+
+    .reset-confirm-bar.is-visible {
+      visibility: visible;
+    }
+
+    /* Kana Row / Deck Selector Modal Styles */
+    .deck-presets-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .deck-groups-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr));
+      gap: 0.65rem;
+    }
+
+    .deck-group-card {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.4rem;
+      padding: 0.75rem 0.9rem;
+      border-radius: 0.85rem;
+      border: 2px solid rgba(255, 255, 255, 0.14);
+      background: rgba(30, 41, 59, 0.45);
+      color: var(--text-main);
+      text-align: left;
+      transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .deck-group-card[aria-pressed="true"] {
+      background: rgba(16, 185, 129, 0.2);
+      border-color: #10b981;
+      box-shadow: 0 0 16px rgba(16, 185, 129, 0.25), inset 0 0 10px rgba(16, 185, 129, 0.18);
+    }
+
+    .deck-group-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      inline-size: 100%;
+      font-weight: 700;
+      font-size: 0.88rem;
+    }
+
+    .deck-group-status {
+      font-size: 0.68rem;
+      padding: 0.1rem 0.45rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+    }
+
+    .deck-group-card[aria-pressed="true"] .deck-group-status {
+      background: rgba(16, 185, 129, 0.3);
+      color: #a7f3d0;
+    }
+
+    .deck-group-chars {
+      font-family: var(--font-kana);
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #ffffff;
+    }
+
+    .deck-validation-msg {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #fbbf24;
+      min-block-size: 1.25rem;
+    }
+
+    @media (max-width: 640px) {
+      .gojuon-row {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+      .gojuon-row-label {
+        grid-column: 1 / -1;
+        padding-bottom: 0.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- === SECTION: HTML LAYOUT === -->
+  <main class="app-stage">
+    <!-- Top HUD Header -->
+    <header class="hud-header" aria-label="Game Heads-Up Display">
+      <div class="hud-brand-stats">
+        <div class="brand-identity">
+          <img
+            src="assets/logo-badge.png"
+            alt="Hiragana Jam Guitar Emblem"
+            width="38"
+            height="38"
+            class="brand-logo-badge"
+          />
+          <h1 class="brand-title">Hiragana Jam</h1>
+        </div>
+        <div class="stat-pill" aria-live="polite">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="hud-score">0</span>
+        </div>
+        <div class="stat-pill" aria-live="polite">
+          <span class="stat-label">Combo</span>
+          <span class="stat-value combo-highlight" id="hud-combo">0x</span>
+        </div>
+      </div>
+
+      <!-- Target Romaji Prompt Card -->
+      <section class="romaji-prompt-card" aria-live="assertive" aria-label="Target Romaji Prompt">
+        <div>
+          <div class="prompt-sub">Target Romaji</div>
+          <div class="prompt-romaji" id="hud-target-romaji">KA</div>
+        </div>
+        <div class="prompt-speed-badge" id="hud-speed-badge">Lv. 0 • 1.00x Speed</div>
+      </section>
+
+      <!-- Right HUD Controls & Rock Meter -->
+      <div class="hud-controls">
+        <div class="rock-meter-wrap" aria-label="Rock Meter">
+          <span class="stat-label">Rock Meter</span>
+          <div class="rock-meter-bar">
+            <div class="rock-meter-fill" id="hud-rock-meter"></div>
+          </div>
+        </div>
+        <button type="button" class="hud-btn" id="btn-mute-toggle" aria-label="Mute Audio" aria-pressed="false">
+          <span aria-hidden="true" id="hud-mute-icon">🔊</span>
+        </button>
+        <button type="button" class="hud-btn" id="btn-deck-selector">
+          🎸 Kana Rows
+        </button>
+        <button type="button" class="hud-btn" id="btn-mastery-chart">
+          📊 Mastery Chart
+        </button>
+        <button type="button" class="hud-btn primary" id="btn-start-pause">
+          ▶ Jam
+        </button>
+      </div>
+    </header>
+
+    <!-- Center Guitar Highway Stage -->
+    <section class="highway-stage" aria-label="Guitar Fretboard Highway">
+      <div class="fretboard-highway" id="fretboard-highway">
+        <div class="fret-wires" id="fret-wires"></div>
+        <div class="fret-inlays" aria-hidden="true">
+          <div class="inlay-diamond"></div>
+          <div class="inlay-diamond"></div>
+          <div class="inlay-diamond"></div>
+          <div class="inlay-diamond"></div>
+        </div>
+
+        <!-- 4 Color-Coded Guitar Lanes with Note Elements -->
+        <div class="guitar-lane" data-lane="0">
+          <div class="guitar-string"></div>
+          <div class="hiragana-note" id="lane-note-0" style="top: 58%;">き</div>
+        </div>
+        <div class="guitar-lane" data-lane="1">
+          <div class="guitar-string"></div>
+          <div class="hiragana-note" id="lane-note-1" style="top: 58%;">か</div>
+        </div>
+        <div class="guitar-lane" data-lane="2">
+          <div class="guitar-string"></div>
+          <div class="hiragana-note" id="lane-note-2" style="top: 58%;">く</div>
+        </div>
+        <div class="guitar-lane" data-lane="3">
+          <div class="guitar-string"></div>
+          <div class="hiragana-note" id="lane-note-3" style="top: 58%;">さ</div>
+        </div>
+
+        <!-- Glowing Strike Zone -->
+        <div class="strike-zone" id="strike-zone" aria-hidden="true">
+          <div class="strike-ring" data-lane="0"></div>
+          <div class="strike-ring" data-lane="1"></div>
+          <div class="strike-ring" data-lane="2"></div>
+          <div class="strike-ring" data-lane="3"></div>
+        </div>
+      </div>
+
+      <!-- Floating Judgment Feedback Banner -->
+      <div class="judgment-popup" id="judgment-popup" aria-live="polite"></div>
+    </section>
+
+    <!-- Bottom Fret Buttons -->
+    <footer class="fret-buttons-bar" aria-label="Guitar Fret Controls">
+      <button type="button" class="fret-btn" data-lane="0" aria-label="Lane 1 Fret D">
+        <span class="fret-key-label">D</span>
+        <span class="fret-sub-label">1 / ←</span>
+      </button>
+      <button type="button" class="fret-btn" data-lane="1" aria-label="Lane 2 Fret F">
+        <span class="fret-key-label">F</span>
+        <span class="fret-sub-label">2 / ↓</span>
+      </button>
+      <button type="button" class="fret-btn" data-lane="2" aria-label="Lane 3 Fret J">
+        <span class="fret-key-label">J</span>
+        <span class="fret-sub-label">3 / ↑</span>
+      </button>
+      <button type="button" class="fret-btn" data-lane="3" aria-label="Lane 4 Fret K">
+        <span class="fret-key-label">K</span>
+        <span class="fret-sub-label">4 / →</span>
+      </button>
+    </footer>
+
+    <!-- Hiragana Mastery Chart Modal Dialog -->
+    <dialog class="jam-dialog" id="dialog-mastery" closedby="any" aria-labelledby="dialog-mastery-title">
+      <div class="dialog-header">
+        <h2 class="dialog-title" id="dialog-mastery-title">Gojūon Mastery &amp; Speed Chart (46 Kana)</h2>
+        <form method="dialog">
+          <button type="submit" class="hud-btn" autofocus>✕ Close</button>
+        </form>
+      </div>
+      <div class="dialog-body">
+        <div class="mastery-legend" aria-label="Mastery Tier Legend">
+          <span class="legend-chip">
+            <span class="legend-dot" style="background: #64748b;"></span>
+            Lv. 0 Unseen / New (1.00x)
+          </span>
+          <span class="legend-chip">
+            <span class="legend-dot" style="background: #3b82f6;"></span>
+            Lv. 1 Learning (1.25x)
+          </span>
+          <span class="legend-chip">
+            <span class="legend-dot" style="background: #10b981;"></span>
+            Lv. 2–3 Familiar (1.50x–1.75x)
+          </span>
+          <span class="legend-chip">
+            <span class="legend-dot" style="background: #fbbf24;"></span>
+            Lv. 4–5 Mastered 🔥 (2.00x–2.25x)
+          </span>
+        </div>
+        <div class="gojuon-rows" id="mastery-grid-container"></div>
+      </div>
+      <div class="dialog-footer">
+        <button type="button" class="hud-btn danger" id="btn-reset-progress">
+          Reset Progress
+        </button>
+        <div class="reset-confirm-bar" id="reset-confirm-bar" role="group" aria-label="Confirm Reset Progress">
+          <span style="font-size: 0.8rem; color: #fca5a5; font-weight: 700;">Reset all 46 kana stats?</span>
+          <button type="button" class="hud-btn danger" id="btn-confirm-reset">Yes, Reset</button>
+          <button type="button" class="hud-btn" id="btn-cancel-reset">Cancel</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Kana Row / Lesson Deck Selector Modal Dialog -->
+    <dialog class="jam-dialog" id="dialog-deck" closedby="any" aria-labelledby="dialog-deck-title">
+      <div class="dialog-header">
+        <h2 class="dialog-title" id="dialog-deck-title">Select Kana Rows (Lesson Deck)</h2>
+        <form method="dialog">
+          <button type="submit" class="hud-btn" autofocus>✕ Close</button>
+        </form>
+      </div>
+      <div class="dialog-body">
+        <div class="deck-presets-bar" aria-label="Lesson Deck Presets">
+          <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 700;">Presets:</span>
+          <button type="button" class="hud-btn" data-preset="beginner">
+            Beginner: あ–さ (15)
+          </button>
+          <button type="button" class="hud-btn" data-preset="intermediate">
+            Intermediate: あ–な (25)
+          </button>
+          <button type="button" class="hud-btn" data-preset="all">
+            Full Gojūon: All 46
+          </button>
+        </div>
+        <div class="deck-groups-grid" id="deck-groups-container"></div>
+      </div>
+      <div class="dialog-footer">
+        <div class="deck-validation-msg" id="deck-validation-msg" aria-live="polite">
+          Active Deck: 46 characters selected
+        </div>
+        <form method="dialog">
+          <button type="submit" class="hud-btn primary">Done &amp; Jam</button>
+        </form>
+      </div>
+    </dialog>
+  </main>
+
+  <!-- === SECTION: HIRAGANA DATA === -->
+  <script>
+    const HIRAGANA_GROUPS = [
+      { id: 'vowels', label: 'Vowels (あ–お)', sample: 'あ' },
+      { id: 'k', label: 'K-Row (か–こ)', sample: 'か' },
+      { id: 's', label: 'S-Row (さ–そ)', sample: 'さ' },
+      { id: 't', label: 'T-Row (た–と)', sample: 'た' },
+      { id: 'n', label: 'N-Row (な–の)', sample: 'な' },
+      { id: 'h', label: 'H-Row (は–ほ)', sample: 'は' },
+      { id: 'm', label: 'M-Row (ま–も)', sample: 'ま' },
+      { id: 'y', label: 'Y-Row (や–よ)', sample: 'や' },
+      { id: 'r', label: 'R-Row (ら–ろ)', sample: 'ら' },
+      { id: 'w', label: 'W/N-Row (わ–ん)', sample: 'わ' }
+    ];
+
+    const HIRAGANA_DATA = [
+      // Vowels (あ–お)
+      { char: 'あ', romaji: 'a', group: 'vowels', rowLabel: 'Vowels (あ–お)', confusables: ['お', 'め', 'ぬ'] },
+      { char: 'い', romaji: 'i', group: 'vowels', rowLabel: 'Vowels (あ–お)', confusables: ['り', 'こ', 'け'] },
+      { char: 'う', romaji: 'u', group: 'vowels', rowLabel: 'Vowels (あ–お)', confusables: ['つ', 'ら', 'ち'] },
+      { char: 'え', romaji: 'e', group: 'vowels', rowLabel: 'Vowels (あ–お)', confusables: ['ん', 'そ', 'て'] },
+      { char: 'お', romaji: 'o', group: 'vowels', rowLabel: 'Vowels (あ–お)', confusables: ['あ', 'む', 'す'] },
+
+      // K-Row (か–こ)
+      { char: 'か', romaji: 'ka', group: 'k', rowLabel: 'K-Row (か–こ)', confusables: ['や', 'せ', 'き'] },
+      { char: 'き', romaji: 'ki', group: 'k', rowLabel: 'K-Row (か–こ)', confusables: ['さ', 'ち', 'ま'] },
+      { char: 'く', romaji: 'ku', group: 'k', rowLabel: 'K-Row (か–こ)', confusables: ['へ', 'て', 'し'] },
+      { char: 'け', romaji: 'ke', group: 'k', rowLabel: 'K-Row (か–こ)', confusables: ['は', 'ほ', 'に'] },
+      { char: 'こ', romaji: 'ko', group: 'k', rowLabel: 'K-Row (か–こ)', confusables: ['に', 'い', 'た'] },
+
+      // S-Row (さ–そ)
+      { char: 'さ', romaji: 'sa', group: 's', rowLabel: 'S-Row (さ–そ)', confusables: ['き', 'ち', 'ら'] },
+      { char: 'し', romaji: 'shi', group: 's', rowLabel: 'S-Row (さ–そ)', confusables: ['つ', 'く', 'も'] },
+      { char: 'す', romaji: 'su', group: 's', rowLabel: 'S-Row (さ–そ)', confusables: ['む', 'お', 'ま'] },
+      { char: 'せ', romaji: 'se', group: 's', rowLabel: 'S-Row (さ–そ)', confusables: ['さ', 'か', 'き'] },
+      { char: 'そ', romaji: 'so', group: 's', rowLabel: 'S-Row (さ–そ)', confusables: ['ろ', 'る', 'て'] },
+
+      // T-Row (た–と)
+      { char: 'た', romaji: 'ta', group: 't', rowLabel: 'T-Row (た–と)', confusables: ['に', 'な', 'こ'] },
+      { char: 'ち', romaji: 'chi', group: 't', rowLabel: 'T-Row (た–と)', confusables: ['さ', 'ら', 'き'] },
+      { char: 'つ', romaji: 'tsu', group: 't', rowLabel: 'T-Row (た–と)', confusables: ['う', 'し', 'て'] },
+      { char: 'て', romaji: 'te', group: 't', rowLabel: 'T-Row (た–と)', confusables: ['と', 'そ', 'く'] },
+      { char: 'と', romaji: 'to', group: 't', rowLabel: 'T-Row (た–と)', confusables: ['て', 'こ', 'よ'] },
+
+      // N-Row (な–の)
+      { char: 'な', romaji: 'na', group: 'n', rowLabel: 'N-Row (な–の)', confusables: ['た', 'は', 'ほ'] },
+      { char: 'に', romaji: 'ni', group: 'n', rowLabel: 'N-Row (な–の)', confusables: ['こ', 'た', 'け'] },
+      { char: 'ぬ', romaji: 'nu', group: 'n', rowLabel: 'N-Row (な–の)', confusables: ['め', 'ね', 'わ'] },
+      { char: 'ね', romaji: 'ne', group: 'n', rowLabel: 'N-Row (な–の)', confusables: ['れ', 'わ', 'ぬ'] },
+      { char: 'の', romaji: 'no', group: 'n', rowLabel: 'N-Row (な–の)', confusables: ['め', 'ぬ', 'あ'] },
+
+      // H-Row (は–ほ)
+      { char: 'は', romaji: 'ha', group: 'h', rowLabel: 'H-Row (は–ほ)', confusables: ['ほ', 'け', 'ま'] },
+      { char: 'ひ', romaji: 'hi', group: 'h', rowLabel: 'H-Row (は–ほ)', confusables: ['て', 'く', 'ん'] },
+      { char: 'ふ', romaji: 'fu', group: 'h', rowLabel: 'H-Row (は–ほ)', confusables: ['う', 'や', 'む'] },
+      { char: 'へ', romaji: 'he', group: 'h', rowLabel: 'H-Row (は–ほ)', confusables: ['く', 'て', 'ひ'] },
+      { char: 'ほ', romaji: 'ho', group: 'h', rowLabel: 'H-Row (は–ほ)', confusables: ['は', 'ま', 'け'] },
+
+      // M-Row (ま–も)
+      { char: 'ま', romaji: 'ma', group: 'm', rowLabel: 'M-Row (ま–も)', confusables: ['ほ', 'は', 'よ'] },
+      { char: 'み', romaji: 'mi', group: 'm', rowLabel: 'M-Row (ま–も)', confusables: ['お', 'す', 'む'] },
+      { char: 'む', romaji: 'mu', group: 'm', rowLabel: 'M-Row (ま–も)', confusables: ['す', 'お', 'ふ'] },
+      { char: 'め', romaji: 'me', group: 'm', rowLabel: 'M-Row (ま–も)', confusables: ['ぬ', 'の', 'あ'] },
+      { char: 'も', romaji: 'mo', group: 'm', rowLabel: 'M-Row (ま–も)', confusables: ['ま', 'し', 'き'] },
+
+      // Y-Row (や–よ)
+      { char: 'や', romaji: 'ya', group: 'y', rowLabel: 'Y-Row (や–よ)', confusables: ['か', 'ゆ', 'ふ'] },
+      { char: 'ゆ', romaji: 'yu', group: 'y', rowLabel: 'Y-Row (や–よ)', confusables: ['わ', 'や', 'ぬ'] },
+      { char: 'よ', romaji: 'yo', group: 'y', rowLabel: 'Y-Row (や–よ)', confusables: ['ま', 'は', 'と'] },
+
+      // R-Row (ら–ろ)
+      { char: 'ら', romaji: 'ra', group: 'r', rowLabel: 'R-Row (ら–ろ)', confusables: ['ち', 'う', 'さ'] },
+      { char: 'り', romaji: 'ri', group: 'r', rowLabel: 'R-Row (ら–ろ)', confusables: ['い', 'け', 'こ'] },
+      { char: 'る', romaji: 'ru', group: 'r', rowLabel: 'R-Row (ら–ろ)', confusables: ['ろ', 'そ', 'わ'] },
+      { char: 'れ', romaji: 're', group: 'r', rowLabel: 'R-Row (ら–ろ)', confusables: ['ね', 'わ', 'ぬ'] },
+      { char: 'ろ', romaji: 'ro', group: 'r', rowLabel: 'R-Row (ら–ろ)', confusables: ['る', 'そ', 'て'] },
+
+      // W/N-Row (わ, を, ん)
+      { char: 'わ', romaji: 'wa', group: 'w', rowLabel: 'W/N-Row (わ–ん)', confusables: ['れ', 'ね', 'ぬ'] },
+      { char: 'を', romaji: 'wo', group: 'w', rowLabel: 'W/N-Row (わ–ん)', confusables: ['ち', 'さ', 'た'] },
+      { char: 'ん', romaji: 'n', group: 'w', rowLabel: 'W/N-Row (わ–ん)', confusables: ['え', 'れ', 'ひ'] }
+    ];
+
+    /**
+     * Returns `count` unique distractor Hiragana items for a given target character.
+     * Prioritizes visually/phonetically similar characters or same-row characters in `activePool`.
+     */
+    function getDistractors(targetChar, activePool = HIRAGANA_DATA, count = 3) {
+      const targetCode = typeof targetChar === 'string' ? targetChar : targetChar.char;
+      const targetEntry = HIRAGANA_DATA.find((item) => item.char === targetCode) || HIRAGANA_DATA[0];
+
+      const poolToUse = activePool && activePool.length >= count + 1 ? activePool : HIRAGANA_DATA;
+      const candidates = poolToUse.filter((item) => item.char !== targetEntry.char);
+
+      // Score candidates so visually confusable or same-row kana are preferred, with slight randomness
+      const scored = candidates.map((item) => {
+        let weight = Math.random() * 2;
+        if (targetEntry.confusables && targetEntry.confusables.includes(item.char)) {
+          weight += 2.5;
+        }
+        if (item.group === targetEntry.group) {
+          weight += 1.5;
+        }
+        return { item, weight };
+      });
+
+      scored.sort((a, b) => b.weight - a.weight);
+      return scored.slice(0, count).map((entry) => entry.item);
+    }
+  </script>
+
+  <!-- === SECTION: SRS & STORAGE ENGINE === -->
+  <script>
+    const STORAGE_KEY = 'hiragana_jam_save_v1';
+    const SPEED_BY_MASTERY = [1.0, 1.25, 1.5, 1.75, 2.0, 2.25];
+    const BASE_INTERVAL_BY_MASTERY = [1, 2, 4, 7, 12, 20];
+
+    const SrsEngine = {
+      currentTurn: 0,
+      lastTargetChar: null,
+      isMuted: false,
+      enabledGroups: new Set(HIRAGANA_GROUPS.map((g) => g.id)),
+      profiles: {},
+
+      init() {
+        this.profiles = {};
+        HIRAGANA_DATA.forEach((item) => {
+          this.profiles[item.char] = this.createDefaultProfile(item);
+        });
+        this.loadFromStorage();
+      },
+
+      createDefaultProfile(item) {
+        return {
+          char: item.char,
+          romaji: item.romaji,
+          group: item.group,
+          masteryLevel: 0,      // 0 (New) to 5 (Mastered)
+          streak: 0,            // Consecutive correct hits
+          easiness: 2.5,        // SM-2 inspired easiness factor (1.3 - 3.0)
+          nextReviewTurn: 0,    // Turn/wave index when this character is due
+          speedMultiplier: 1.0, // Scales with masteryLevel (1.0x -> 2.25x)
+          hits: 0,
+          misses: 0
+        };
+      },
+
+      saveToStorage() {
+        try {
+          if (typeof localStorage === 'undefined') return;
+          const payload = {
+            version: 1,
+            currentTurn: this.currentTurn,
+            isMuted: this.isMuted,
+            enabledGroups: Array.from(this.enabledGroups),
+            profiles: this.profiles
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        } catch (err) {
+          // Ignore storage quota or private-mode errors so gameplay continues
+        }
+      },
+
+      loadFromStorage() {
+        try {
+          if (typeof localStorage === 'undefined') return;
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return;
+          const parsed = JSON.parse(raw);
+          if (!parsed || typeof parsed !== 'object') return;
+
+          if (typeof parsed.currentTurn === 'number' && parsed.currentTurn >= 0) {
+            this.currentTurn = parsed.currentTurn;
+          }
+
+          if (typeof parsed.isMuted === 'boolean') {
+            this.isMuted = parsed.isMuted;
+          }
+
+          if (Array.isArray(parsed.enabledGroups) && parsed.enabledGroups.length > 0) {
+            const validIds = HIRAGANA_GROUPS.map((g) => g.id);
+            const filtered = parsed.enabledGroups.filter((id) => validIds.includes(id));
+            if (filtered.length > 0) {
+              this.enabledGroups = new Set(filtered);
+            }
+          }
+
+          if (parsed.profiles && typeof parsed.profiles === 'object') {
+            HIRAGANA_DATA.forEach((item) => {
+              const saved = parsed.profiles[item.char];
+              if (saved && typeof saved === 'object') {
+                const level = Math.max(0, Math.min(5, Number(saved.masteryLevel) || 0));
+                this.profiles[item.char] = {
+                  char: item.char,
+                  romaji: item.romaji,
+                  group: item.group,
+                  masteryLevel: level,
+                  streak: Math.max(0, Number(saved.streak) || 0),
+                  easiness: Math.max(1.3, Math.min(3.0, Number(saved.easiness) || 2.5)),
+                  nextReviewTurn: Math.max(0, Number(saved.nextReviewTurn) || 0),
+                  speedMultiplier: this.getSpeedForLevel(level),
+                  hits: Math.max(0, Number(saved.hits) || 0),
+                  misses: Math.max(0, Number(saved.misses) || 0)
+                };
+              }
+            });
+          }
+        } catch (err) {
+          // Ignore corrupt localStorage entries
+        }
+      },
+
+      resetAllProgress() {
+        this.currentTurn = 0;
+        this.lastTargetChar = null;
+        HIRAGANA_DATA.forEach((item) => {
+          this.profiles[item.char] = this.createDefaultProfile(item);
+        });
+        this.saveToStorage();
+      },
+
+      getSpeedForLevel(level) {
+        const clamped = Math.max(0, Math.min(5, level));
+        return SPEED_BY_MASTERY[clamped];
+      },
+
+      getProfile(charOrObj) {
+        const key = typeof charOrObj === 'string' ? charOrObj : charOrObj.char;
+        if (!this.profiles[key]) {
+          const item = HIRAGANA_DATA.find((d) => d.char === key) || HIRAGANA_DATA[0];
+          this.profiles[key] = this.createDefaultProfile(item);
+        }
+        return this.profiles[key];
+      },
+
+      getActivePool() {
+        const filtered = HIRAGANA_DATA.filter((item) => this.enabledGroups.has(item.group));
+        return filtered.length >= 5 ? filtered : HIRAGANA_DATA;
+      },
+
+      setGroups(groupIds) {
+        const validIds = HIRAGANA_GROUPS.map((g) => g.id);
+        const filteredIds = groupIds.filter((id) => validIds.includes(id));
+        const matchingChars = HIRAGANA_DATA.filter((item) => filteredIds.includes(item.group));
+        if (filteredIds.length < 1 || matchingChars.length < 5) {
+          return false;
+        }
+        this.enabledGroups = new Set(filteredIds);
+        this.saveToStorage();
+        return true;
+      },
+
+      recordResult(charOrObj, isHit, isInStrikeZone = false) {
+        const profile = this.getProfile(charOrObj);
+        this.currentTurn += 1;
+
+        if (isHit) {
+          profile.hits += 1;
+          profile.streak += 1;
+          profile.masteryLevel = Math.min(5, profile.masteryLevel + 1);
+          const easinessDelta = isInStrikeZone ? 0.1 : 0.05;
+          profile.easiness = Math.min(3.0, Number((profile.easiness + easinessDelta).toFixed(2)));
+          profile.speedMultiplier = this.getSpeedForLevel(profile.masteryLevel);
+
+          const baseInterval = BASE_INTERVAL_BY_MASTERY[profile.masteryLevel] || 2;
+          const scheduledInterval = Math.max(1, Math.round(baseInterval * (profile.easiness / 2.0)));
+          profile.nextReviewTurn = this.currentTurn + scheduledInterval;
+        } else {
+          profile.misses += 1;
+          profile.streak = 0;
+          profile.masteryLevel = Math.max(0, profile.masteryLevel - 1);
+          profile.easiness = Math.max(1.3, Number((profile.easiness - 0.2).toFixed(2)));
+          profile.speedMultiplier = this.getSpeedForLevel(profile.masteryLevel);
+          // Schedule missed character to reappear within 2 turns for immediate reinforcement
+          profile.nextReviewTurn = this.currentTurn + 2;
+        }
+
+        if (typeof this.saveToStorage === 'function') {
+          this.saveToStorage();
+        }
+
+        return profile;
+      },
+
+      selectNextTarget() {
+        const pool = this.getActivePool();
+        const candidates = pool.length > 1
+          ? pool.filter((item) => item.char !== this.lastTargetChar)
+          : pool;
+
+        const dueCandidates = [];
+        const newCandidates = [];
+        const futureCandidates = [];
+
+        candidates.forEach((item) => {
+          const p = this.getProfile(item.char);
+          const isSeen = p.hits > 0 || p.misses > 0;
+          if (isSeen && p.nextReviewTurn <= this.currentTurn) {
+            dueCandidates.push({ item, profile: p });
+          } else if (!isSeen) {
+            newCandidates.push({ item, profile: p });
+          } else {
+            futureCandidates.push({ item, profile: p });
+          }
+        });
+
+        let chosen = null;
+
+        if (dueCandidates.length > 0) {
+          // Prioritize overdue characters with lowest masteryLevel first
+          dueCandidates.sort((a, b) => {
+            if (a.profile.masteryLevel !== b.profile.masteryLevel) {
+              return a.profile.masteryLevel - b.profile.masteryLevel;
+            }
+            return a.profile.nextReviewTurn - b.profile.nextReviewTurn;
+          });
+          // Pick randomly among top 2 most urgent due items for natural variety
+          const topSlice = dueCandidates.slice(0, Math.min(2, dueCandidates.length));
+          chosen = topSlice[Math.floor(Math.random() * topSlice.length)].item;
+        } else if (newCandidates.length > 0) {
+          // Introduce unseen characters in row order with slight randomness among next 4 kana
+          const introBatch = newCandidates.slice(0, Math.min(4, newCandidates.length));
+          chosen = introBatch[Math.floor(Math.random() * introBatch.length)].item;
+        } else {
+          // All active characters have been seen and are scheduled in the future; pick soonest due
+          futureCandidates.sort((a, b) => a.profile.nextReviewTurn - b.profile.nextReviewTurn);
+          const soonestSlice = futureCandidates.slice(0, Math.min(3, futureCandidates.length));
+          chosen = soonestSlice[Math.floor(Math.random() * soonestSlice.length)].item;
+        }
+
+        this.lastTargetChar = chosen.char;
+        return chosen;
+      }
+    };
+
+    SrsEngine.init();
+  </script>
+
+  <!-- === SECTION: AUDIO ENGINE === -->
+  <script>
+    const AudioEngine = {
+      ctx: null,
+      // Pentatonic / rock guitar base frequencies (Hz) across the 4 lanes: E3, G3, A3, B3
+      laneBaseFreqs: [164.81, 196.00, 220.00, 246.94],
+
+      ensureContext() {
+        if (SrsEngine.isMuted) return null;
+        if (!this.ctx && typeof window !== 'undefined') {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            this.ctx = new AudioCtx();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume().catch(() => {});
+        }
+        return this.ctx;
+      },
+
+      isMuted() {
+        return Boolean(SrsEngine.isMuted);
+      },
+
+      toggleMute() {
+        SrsEngine.isMuted = !SrsEngine.isMuted;
+        SrsEngine.saveToStorage();
+        if (!SrsEngine.isMuted) {
+          this.ensureContext();
+        }
+        return SrsEngine.isMuted;
+      },
+
+      /**
+       * Synthesizes a slide guitar pluck / chord on a correct Hiragana hit.
+       * When `isPerfect` is true (hit inside the Strike Zone), adds a bright harmonic power-chord shimmer.
+       */
+      playGuitarHit(lane = 0, combo = 1, isPerfect = false) {
+        const ctx = this.ensureContext();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+        const baseFreq = this.laneBaseFreqs[lane % 4] || 196.0;
+        // Subtle pitch climb with combo (up to +7 semitones before wrapping)
+        const semitoneShift = Math.min(combo - 1, 12) * 0.5;
+        const rootFreq = baseFreq * Math.pow(2, semitoneShift / 12);
+
+        // Master output gain for this note
+        const masterGain = ctx.createGain();
+        masterGain.gain.setValueAtTime(0.001, now);
+        masterGain.gain.linearRampToValueAtTime(isPerfect ? 0.26 : 0.20, now + 0.012);
+        masterGain.gain.exponentialRampToValueAtTime(0.0008, now + (isPerfect ? 0.65 : 0.42));
+        masterGain.connect(ctx.destination);
+
+        // Low-pass filter with a plucked envelope sweep for realistic electric guitar bite
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(isPerfect ? 3400 : 2400, now);
+        filter.frequency.exponentialRampToValueAtTime(420, now + 0.38);
+        filter.Q.setValueAtTime(isPerfect ? 3.5 : 2.0, now);
+        filter.connect(masterGain);
+
+        // Fundamental sawtooth + triangle body with slight slide-guitar pitch bend
+        const oscMain = ctx.createOscillator();
+        oscMain.type = 'sawtooth';
+        oscMain.frequency.setValueAtTime(rootFreq * 0.97, now);
+        oscMain.frequency.exponentialRampToValueAtTime(rootFreq, now + 0.045);
+
+        const oscSub = ctx.createOscillator();
+        oscSub.type = 'triangle';
+        oscSub.frequency.setValueAtTime(rootFreq * 2, now);
+
+        oscMain.connect(filter);
+        oscSub.connect(filter);
+
+        oscMain.start(now);
+        oscSub.start(now);
+        const stopTime = now + (isPerfect ? 0.68 : 0.45);
+        oscMain.stop(stopTime);
+        oscSub.stop(stopTime);
+
+        // Perfect Strike Zone Hit: Add fifth + octave power chord harmonic shimmer
+        if (isPerfect) {
+          const fifthFreq = rootFreq * 1.4983; // Perfect fifth
+          const shimmerOsc = ctx.createOscillator();
+          const shimmerGain = ctx.createGain();
+
+          shimmerOsc.type = 'sawtooth';
+          shimmerOsc.frequency.setValueAtTime(fifthFreq, now);
+
+          shimmerGain.gain.setValueAtTime(0.001, now);
+          shimmerGain.gain.linearRampToValueAtTime(0.14, now + 0.02);
+          shimmerGain.gain.exponentialRampToValueAtTime(0.0008, now + 0.62);
+
+          shimmerOsc.connect(shimmerGain);
+          shimmerGain.connect(filter);
+
+          shimmerOsc.start(now);
+          shimmerOsc.stop(now + 0.65);
+        }
+      },
+
+      /**
+       * Synthesizes a low-frequency muted fret buzz on a wrong Hiragana or timeout miss.
+       */
+      playFretBuzz() {
+        const ctx = this.ensureContext();
+        if (!ctx) return;
+
+        const now = ctx.currentTime;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0.001, now);
+        gain.gain.linearRampToValueAtTime(0.22, now + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+        gain.connect(ctx.destination);
+
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(150, now);
+        filter.Q.setValueAtTime(2.5, now);
+        filter.connect(gain);
+
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
+        osc1.type = 'sawtooth';
+        osc2.type = 'square';
+        // Dissonant tritone / low fret rattle
+        osc1.frequency.setValueAtTime(82.41, now); // Low E2
+        osc1.frequency.linearRampToValueAtTime(73.42, now + 0.24);
+        osc2.frequency.setValueAtTime(87.31, now); // Minor second clash
+
+        osc1.connect(filter);
+        osc2.connect(filter);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.27);
+        osc2.stop(now + 0.27);
+      }
+    };
+  </script>
+
+  <!-- === SECTION: GAME LOOP & RENDERER === -->
+  <script>
+    const KEY_TO_LANE = {
+      d: 0, D: 0, '1': 0, ArrowLeft: 0,
+      f: 1, F: 1, '2': 1, ArrowDown: 1,
+      j: 2, J: 2, '3': 2, ArrowUp: 2,
+      k: 3, K: 3, '4': 3, ArrowRight: 3
+    };
+
+    const GameState = {
+      isRunning: false,
+      lastFrameTime: 0,
+      rafId: null,
+      score: 0,
+      combo: 0,
+      rockMeter: 75,
+      baseSpeedPctPerSec: 21, // Base % of highway height traversed per second at 1.0x speed
+      strikeZoneCenterY: 85,  // Center of strike zone in %
+      currentWave: null       // { target, correctLane, laneItems, y, speedMultiplier, resolved }
+    };
+
+    const dom = {
+      score: document.getElementById('hud-score'),
+      combo: document.getElementById('hud-combo'),
+      rockMeter: document.getElementById('hud-rock-meter'),
+      targetRomaji: document.getElementById('hud-target-romaji'),
+      speedBadge: document.getElementById('hud-speed-badge'),
+      btnStartPause: document.getElementById('btn-start-pause'),
+      fretWires: document.getElementById('fret-wires'),
+      fretboardHighway: document.getElementById('fretboard-highway'),
+      judgmentPopup: document.getElementById('judgment-popup'),
+      strikeRings: [
+        document.querySelector('.strike-ring[data-lane="0"]'),
+        document.querySelector('.strike-ring[data-lane="1"]'),
+        document.querySelector('.strike-ring[data-lane="2"]'),
+        document.querySelector('.strike-ring[data-lane="3"]')
+      ],
+      laneNotes: [
+        document.getElementById('lane-note-0'),
+        document.getElementById('lane-note-1'),
+        document.getElementById('lane-note-2'),
+        document.getElementById('lane-note-3')
+      ],
+      guitarLanes: [
+        document.querySelector('.guitar-lane[data-lane="0"]'),
+        document.querySelector('.guitar-lane[data-lane="1"]'),
+        document.querySelector('.guitar-lane[data-lane="2"]'),
+        document.querySelector('.guitar-lane[data-lane="3"]')
+      ],
+      fretButtons: document.querySelectorAll('.fret-btn'),
+      btnMuteToggle: document.getElementById('btn-mute-toggle'),
+      hudMuteIcon: document.getElementById('hud-mute-icon'),
+      btnDeckSelector: document.getElementById('btn-deck-selector'),
+      dialogDeck: document.getElementById('dialog-deck'),
+      deckGroupsContainer: document.getElementById('deck-groups-container'),
+      deckValidationMsg: document.getElementById('deck-validation-msg'),
+      deckPresetBtns: document.querySelectorAll('[data-preset]'),
+      btnMasteryChart: document.getElementById('btn-mastery-chart'),
+      dialogMastery: document.getElementById('dialog-mastery'),
+      masteryGridContainer: document.getElementById('mastery-grid-container'),
+      btnResetProgress: document.getElementById('btn-reset-progress'),
+      resetConfirmBar: document.getElementById('reset-confirm-bar'),
+      btnConfirmReset: document.getElementById('btn-confirm-reset'),
+      btnCancelReset: document.getElementById('btn-cancel-reset')
+    };
+
+    let nextWaveTimer = null;
+
+    function clearNoteStateClasses() {
+      for (let lane = 0; lane < 4; lane++) {
+        const noteEl = dom.laneNotes[lane];
+        if (noteEl) {
+          noteEl.classList.remove('is-hit', 'is-wrong', 'is-correct-reveal', 'is-fast-note');
+        }
+        const laneEl = dom.guitarLanes[lane];
+        if (laneEl) {
+          laneEl.classList.remove('lane-hit-flash');
+        }
+        const ringEl = dom.strikeRings[lane];
+        if (ringEl) {
+          ringEl.classList.remove('is-flame-burst');
+        }
+      }
+    }
+
+    function showJudgmentPopup(text, type = 'good') {
+      if (!dom.judgmentPopup) return;
+      dom.judgmentPopup.textContent = text;
+      dom.judgmentPopup.dataset.type = type;
+      dom.judgmentPopup.classList.remove('is-active');
+      // Force reflow so rapid consecutive hits re-trigger CSS keyframe animation
+      void dom.judgmentPopup.offsetWidth;
+      dom.judgmentPopup.classList.add('is-active');
+    }
+
+    function triggerFretFlameBurst(lane) {
+      const ringEl = dom.strikeRings[lane];
+      if (!ringEl) return;
+      ringEl.classList.remove('is-flame-burst');
+      void ringEl.offsetWidth;
+      ringEl.classList.add('is-flame-burst');
+    }
+
+    function updateHudStats() {
+      const isOverdrive = GameState.combo >= 10;
+      const isSuperOverdrive = GameState.combo >= 25;
+      dom.score.textContent = GameState.score.toLocaleString();
+      dom.combo.textContent = isOverdrive ? `${GameState.combo}x ⚡2X` : `${GameState.combo}x`;
+      dom.rockMeter.style.inlineSize = `${GameState.rockMeter}%`;
+
+      if (dom.fretboardHighway) {
+        dom.fretboardHighway.classList.toggle('is-overdrive', isOverdrive && !isSuperOverdrive);
+        dom.fretboardHighway.classList.toggle('is-super-overdrive', isSuperOverdrive);
+      }
+    }
+
+    function shuffleArray(items) {
+      const copy = items.slice();
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const tmp = copy[i];
+        copy[i] = copy[j];
+        copy[j] = tmp;
+      }
+      return copy;
+    }
+
+    function pickNextTargetCharacter() {
+      return SrsEngine.selectNextTarget();
+    }
+
+    function formatSpeedBadge(profile) {
+      return `Lv. ${profile.masteryLevel} • ${profile.speedMultiplier.toFixed(2)}x Speed`;
+    }
+
+    function spawnWave(initialY = 0) {
+      if (nextWaveTimer) {
+        clearTimeout(nextWaveTimer);
+        nextWaveTimer = null;
+      }
+      clearNoteStateClasses();
+
+      const activePool = SrsEngine.getActivePool();
+      const target = pickNextTargetCharacter();
+      const profile = SrsEngine.getProfile(target);
+      const distractors = getDistractors(target, activePool, 3);
+      const laneItems = shuffleArray([target, ...distractors]);
+      const correctLane = laneItems.findIndex((item) => item.char === target.char);
+      const speedMultiplier = profile.speedMultiplier;
+
+      GameState.currentWave = {
+        target,
+        correctLane,
+        laneItems,
+        y: initialY,
+        speedMultiplier,
+        resolved: false
+      };
+
+      // Update HUD Prompt & Mastery Speed Badge
+      dom.targetRomaji.textContent = target.romaji.toUpperCase();
+      dom.speedBadge.textContent = formatSpeedBadge(profile);
+
+      // Scale fret-wire scroll speed to match character speed
+      if (dom.fretWires) {
+        const animDuration = (1.2 / speedMultiplier).toFixed(2);
+        dom.fretWires.style.animationDuration = `${animDuration}s`;
+      }
+
+      // Update 4 Lane Note Pucks
+      const isFastWave = speedMultiplier >= 1.75;
+      for (let lane = 0; lane < 4; lane++) {
+        const noteEl = dom.laneNotes[lane];
+        if (noteEl && laneItems[lane]) {
+          noteEl.textContent = laneItems[lane].char;
+          noteEl.style.top = `${initialY}%`;
+          noteEl.classList.toggle('is-fast-note', isFastWave);
+        }
+      }
+    }
+
+    function renderWaveNotes() {
+      if (!GameState.currentWave) return;
+      const yPct = `${GameState.currentWave.y.toFixed(2)}%`;
+      for (let lane = 0; lane < 4; lane++) {
+        const noteEl = dom.laneNotes[lane];
+        if (noteEl) {
+          noteEl.style.top = yPct;
+        }
+      }
+    }
+
+    function handleLaneSelect(lane) {
+      // Auto-start game if the student hits a lane while paused on the initial screen
+      if (!GameState.isRunning) {
+        toggleGameRunning();
+      }
+
+      const wave = GameState.currentWave;
+      if (!wave || wave.resolved) return;
+
+      wave.resolved = true;
+
+      if (lane === wave.correctLane) {
+        // Correct Hiragana Hit!
+        const distFromStrikeZone = Math.abs(wave.y - GameState.strikeZoneCenterY);
+        const isInStrikeZone = distFromStrikeZone <= 9; // Within the glowing strike zone window
+        const basePoints = isInStrikeZone ? 150 : 100;
+
+        const updatedProfile = SrsEngine.recordResult(wave.target, true, isInStrikeZone);
+        dom.speedBadge.textContent = formatSpeedBadge(updatedProfile);
+
+        GameState.combo += 1;
+        AudioEngine.playGuitarHit(lane, GameState.combo, isInStrikeZone);
+
+        const overdriveMultiplier = GameState.combo >= 10 ? 2 : 1;
+        const comboBonus = Math.min(GameState.combo * 10, 150);
+        const awardedPoints = (basePoints + comboBonus) * overdriveMultiplier;
+        GameState.score += awardedPoints;
+        GameState.rockMeter = Math.min(100, GameState.rockMeter + (isInStrikeZone ? 6 : 4));
+
+        updateHudStats();
+        triggerFretFlameBurst(lane);
+
+        const labelPrefix = isInStrikeZone ? 'PERFECT!' : 'GOOD!';
+        const multiplierTag = overdriveMultiplier > 1 ? ' (2X OVERDRIVE!)' : '';
+        showJudgmentPopup(`${labelPrefix} +${awardedPoints}${multiplierTag}`, isInStrikeZone ? 'perfect' : 'good');
+
+        const correctNoteEl = dom.laneNotes[lane];
+        if (correctNoteEl) {
+          correctNoteEl.classList.add('is-hit');
+        }
+        const laneEl = dom.guitarLanes[lane];
+        if (laneEl) {
+          laneEl.classList.add('lane-hit-flash');
+        }
+
+        nextWaveTimer = setTimeout(() => {
+          spawnWave(0);
+        }, 160);
+      } else {
+        // Distractor Selected -> Miss! Highlight the correct Hiragana so the student learns
+        AudioEngine.playFretBuzz();
+        const updatedProfile = SrsEngine.recordResult(wave.target, false, false);
+        dom.speedBadge.textContent = formatSpeedBadge(updatedProfile);
+
+        GameState.combo = 0;
+        GameState.rockMeter = Math.max(10, GameState.rockMeter - 10);
+        updateHudStats();
+        showJudgmentPopup(`MISS! ${wave.target.char} = ${wave.target.romaji.toUpperCase()}`, 'miss');
+
+        const wrongNoteEl = dom.laneNotes[lane];
+        if (wrongNoteEl) {
+          wrongNoteEl.classList.add('is-wrong');
+        }
+        const correctNoteEl = dom.laneNotes[wave.correctLane];
+        if (correctNoteEl) {
+          correctNoteEl.classList.add('is-correct-reveal');
+        }
+
+        nextWaveTimer = setTimeout(() => {
+          spawnWave(0);
+        }, 520);
+      }
+    }
+
+    function handleWaveTimeout() {
+      if (!GameState.currentWave || GameState.currentWave.resolved) return;
+      GameState.currentWave.resolved = true;
+
+      const missedTarget = GameState.currentWave.target;
+      AudioEngine.playFretBuzz();
+      const updatedProfile = SrsEngine.recordResult(missedTarget, false, false);
+      dom.speedBadge.textContent = formatSpeedBadge(updatedProfile);
+
+      // Reset combo on timeout miss and briefly reveal the correct lane
+      GameState.combo = 0;
+      GameState.rockMeter = Math.max(10, GameState.rockMeter - 8);
+      updateHudStats();
+      showJudgmentPopup(`MISS! ${missedTarget.char} = ${missedTarget.romaji.toUpperCase()}`, 'miss');
+
+      const correctNoteEl = dom.laneNotes[GameState.currentWave.correctLane];
+      if (correctNoteEl) {
+        correctNoteEl.classList.add('is-correct-reveal');
+      }
+
+      nextWaveTimer = setTimeout(() => {
+        spawnWave(0);
+      }, 360);
+    }
+
+    function gameLoop(timestamp) {
+      if (!GameState.isRunning) return;
+
+      if (!GameState.lastFrameTime) {
+        GameState.lastFrameTime = timestamp;
+      }
+
+      // Clamp delta time to avoid giant jumps if browser tab was backgrounded
+      const dt = Math.min((timestamp - GameState.lastFrameTime) / 1000, 0.1);
+      GameState.lastFrameTime = timestamp;
+
+      if (GameState.currentWave && !GameState.currentWave.resolved) {
+        const velocity = GameState.baseSpeedPctPerSec * GameState.currentWave.speedMultiplier;
+        GameState.currentWave.y += velocity * dt;
+        renderWaveNotes();
+
+        if (GameState.currentWave.y > 100) {
+          handleWaveTimeout();
+        }
+      }
+
+      GameState.rafId = window.requestAnimationFrame(gameLoop);
+    }
+
+    function toggleGameRunning() {
+      GameState.isRunning = !GameState.isRunning;
+
+      if (GameState.isRunning) {
+        dom.btnStartPause.textContent = '⏸ Pause';
+        dom.fretWires.classList.add('is-running');
+        // If current wave was sitting on preview position or doesn't exist, start fresh at y = 0%
+        if (!GameState.currentWave || GameState.currentWave.resolved) {
+          spawnWave(0);
+        }
+        GameState.lastFrameTime = performance.now();
+        GameState.rafId = window.requestAnimationFrame(gameLoop);
+      } else {
+        dom.btnStartPause.textContent = '▶ Jam';
+        dom.fretWires.classList.remove('is-running');
+        if (GameState.rafId) {
+          window.cancelAnimationFrame(GameState.rafId);
+          GameState.rafId = null;
+        }
+      }
+    }
+
+    function setLanePressed(lane, isPressed) {
+      const btn = document.querySelector(`.fret-btn[data-lane="${lane}"]`);
+      if (btn) {
+        btn.classList.toggle('is-pressed', isPressed);
+      }
+    }
+
+    function getMasteryTier(level) {
+      if (level >= 4) return 'mastered';
+      if (level >= 2) return 'familiar';
+      if (level === 1) return 'learning';
+      return 'unseen';
+    }
+
+    function renderMasteryChart() {
+      if (!dom.masteryGridContainer) return;
+      dom.masteryGridContainer.innerHTML = '';
+
+      HIRAGANA_GROUPS.forEach((group) => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'gojuon-row';
+
+        const labelEl = document.createElement('div');
+        labelEl.className = 'gojuon-row-label';
+        labelEl.textContent = group.label;
+        rowEl.appendChild(labelEl);
+
+        const groupChars = HIRAGANA_DATA.filter((item) => item.group === group.id);
+        groupChars.forEach((item) => {
+          const profile = SrsEngine.getProfile(item.char);
+          const totalAttempts = profile.hits + profile.misses;
+          const accuracyPct = totalAttempts > 0
+            ? `${Math.round((profile.hits / totalAttempts) * 100)}%`
+            : 'New';
+
+          const tile = document.createElement('div');
+          tile.className = 'kana-tile';
+          tile.dataset.tier = getMasteryTier(profile.masteryLevel);
+
+          const charSpan = document.createElement('span');
+          charSpan.className = 'kana-tile-char';
+          charSpan.textContent = profile.masteryLevel >= 4 ? `${item.char}🔥` : item.char;
+
+          const romajiSpan = document.createElement('span');
+          romajiSpan.className = 'kana-tile-romaji';
+          romajiSpan.textContent = `${item.romaji.toUpperCase()} • Lv.${profile.masteryLevel}`;
+
+          const metaSpan = document.createElement('span');
+          metaSpan.className = 'kana-tile-meta';
+          metaSpan.textContent = `${profile.speedMultiplier.toFixed(2)}x • ${accuracyPct}`;
+
+          tile.appendChild(charSpan);
+          tile.appendChild(romajiSpan);
+          tile.appendChild(metaSpan);
+          rowEl.appendChild(tile);
+        });
+
+        dom.masteryGridContainer.appendChild(rowEl);
+      });
+    }
+
+    let wasRunningBeforeModal = false;
+
+    function openMasteryDialog() {
+      if (!dom.dialogMastery) return;
+      wasRunningBeforeModal = GameState.isRunning;
+      if (GameState.isRunning) {
+        toggleGameRunning();
+      }
+      if (dom.resetConfirmBar) {
+        dom.resetConfirmBar.classList.remove('is-visible');
+      }
+      renderMasteryChart();
+      dom.dialogMastery.showModal();
+    }
+
+    function attachLightDismissFallback(dialogEl) {
+      if (!dialogEl || ('closedBy' in HTMLDialogElement.prototype)) return;
+      dialogEl.addEventListener('click', (event) => {
+        if (event.target !== dialogEl) return;
+        const rect = dialogEl.getBoundingClientRect();
+        const isDialogContent = (
+          rect.top <= event.clientY &&
+          event.clientY <= rect.top + rect.height &&
+          rect.left <= event.clientX &&
+          event.clientX <= rect.left + rect.width
+        );
+        if (isDialogContent) return;
+        dialogEl.close();
+      });
+    }
+
+    function updateDeckSummaryMessage(warningText = '') {
+      if (!dom.deckValidationMsg) return;
+      if (warningText) {
+        dom.deckValidationMsg.textContent = warningText;
+        dom.deckValidationMsg.style.color = '#f87171';
+        return;
+      }
+      const activeCount = SrsEngine.getActivePool().length;
+      const rowCount = SrsEngine.enabledGroups.size;
+      dom.deckValidationMsg.textContent = `Active Deck: ${rowCount} row${rowCount === 1 ? '' : 's'} (${activeCount} characters selected)`;
+      dom.deckValidationMsg.style.color = '#fbbf24';
+    }
+
+    function renderDeckSelector() {
+      if (!dom.deckGroupsContainer) return;
+      dom.deckGroupsContainer.innerHTML = '';
+
+      HIRAGANA_GROUPS.forEach((group) => {
+        const isEnabled = SrsEngine.enabledGroups.has(group.id);
+        const groupChars = HIRAGANA_DATA.filter((item) => item.group === group.id);
+        const charsPreview = groupChars.map((item) => item.char).join(' ');
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'deck-group-card';
+        btn.setAttribute('aria-pressed', isEnabled ? 'true' : 'false');
+
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'deck-group-header';
+
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = group.label;
+
+        const statusSpan = document.createElement('span');
+        statusSpan.className = 'deck-group-status';
+        statusSpan.textContent = isEnabled ? 'Active ✓' : 'Off';
+
+        headerDiv.appendChild(titleSpan);
+        headerDiv.appendChild(statusSpan);
+
+        const charsDiv = document.createElement('div');
+        charsDiv.className = 'deck-group-chars';
+        charsDiv.textContent = charsPreview;
+
+        btn.appendChild(headerDiv);
+        btn.appendChild(charsDiv);
+
+        btn.addEventListener('click', () => {
+          const nextGroups = new Set(SrsEngine.enabledGroups);
+          if (nextGroups.has(group.id)) {
+            nextGroups.delete(group.id);
+          } else {
+            nextGroups.add(group.id);
+          }
+
+          const updatedOk = SrsEngine.setGroups(Array.from(nextGroups));
+          if (!updatedOk) {
+            updateDeckSummaryMessage('Keep at least 1 full row (minimum 5 characters) selected!');
+            return;
+          }
+
+          renderDeckSelector();
+          updateDeckSummaryMessage();
+          spawnWave(0);
+        });
+
+        dom.deckGroupsContainer.appendChild(btn);
+      });
+
+      updateDeckSummaryMessage();
+    }
+
+    function openDeckDialog() {
+      if (!dom.dialogDeck) return;
+      wasRunningBeforeModal = GameState.isRunning;
+      if (GameState.isRunning) {
+        toggleGameRunning();
+      }
+      renderDeckSelector();
+      dom.dialogDeck.showModal();
+    }
+
+    if (dom.btnDeckSelector && dom.dialogDeck) {
+      dom.btnDeckSelector.addEventListener('click', openDeckDialog);
+
+      dom.dialogDeck.addEventListener('close', () => {
+        dom.dialogDeck.returnValue = '';
+        if (wasRunningBeforeModal && !GameState.isRunning) {
+          toggleGameRunning();
+        }
+      });
+
+      attachLightDismissFallback(dom.dialogDeck);
+    }
+
+    if (dom.deckPresetBtns) {
+      const PRESET_MAP = {
+        beginner: ['vowels', 'k', 's'],
+        intermediate: ['vowels', 'k', 's', 't', 'n'],
+        all: HIRAGANA_GROUPS.map((g) => g.id)
+      };
+
+      dom.deckPresetBtns.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const presetKey = btn.dataset.preset;
+          const targetGroups = PRESET_MAP[presetKey];
+          if (targetGroups && SrsEngine.setGroups(targetGroups)) {
+            renderDeckSelector();
+            updateDeckSummaryMessage();
+            spawnWave(0);
+          }
+        });
+      });
+    }
+
+    if (dom.btnMasteryChart && dom.dialogMastery) {
+      dom.btnMasteryChart.addEventListener('click', openMasteryDialog);
+
+      dom.dialogMastery.addEventListener('close', () => {
+        dom.dialogMastery.returnValue = '';
+        if (dom.resetConfirmBar) {
+          dom.resetConfirmBar.classList.remove('is-visible');
+        }
+        if (wasRunningBeforeModal && !GameState.isRunning) {
+          toggleGameRunning();
+        }
+      });
+
+      attachLightDismissFallback(dom.dialogMastery);
+    }
+
+    if (dom.btnResetProgress && dom.resetConfirmBar) {
+      dom.btnResetProgress.addEventListener('click', () => {
+        dom.resetConfirmBar.classList.add('is-visible');
+        if (dom.btnCancelReset) {
+          dom.btnCancelReset.focus();
+        }
+      });
+    }
+
+    if (dom.btnCancelReset && dom.resetConfirmBar) {
+      dom.btnCancelReset.addEventListener('click', () => {
+        dom.resetConfirmBar.classList.remove('is-visible');
+      });
+    }
+
+    if (dom.btnConfirmReset) {
+      dom.btnConfirmReset.addEventListener('click', () => {
+        SrsEngine.resetAllProgress();
+        GameState.score = 0;
+        GameState.combo = 0;
+        GameState.rockMeter = 75;
+        updateHudStats();
+        spawnWave(0);
+        renderMasteryChart();
+        if (dom.resetConfirmBar) {
+          dom.resetConfirmBar.classList.remove('is-visible');
+        }
+      });
+    }
+
+    function syncMuteButtonUi() {
+      if (!dom.btnMuteToggle || !dom.hudMuteIcon) return;
+      const muted = AudioEngine.isMuted();
+      dom.hudMuteIcon.textContent = muted ? '🔇' : '🔊';
+      dom.btnMuteToggle.setAttribute('aria-pressed', muted ? 'true' : 'false');
+      dom.btnMuteToggle.setAttribute('aria-label', muted ? 'Unmute Audio' : 'Mute Audio');
+    }
+
+    if (dom.btnMuteToggle) {
+      syncMuteButtonUi();
+      dom.btnMuteToggle.addEventListener('click', () => {
+        const muted = AudioEngine.toggleMute();
+        syncMuteButtonUi();
+        if (!muted) {
+          AudioEngine.playGuitarHit(0, 1, false);
+        }
+      });
+    }
+
+    // Bind Start/Pause button & Spacebar shortcut
+    dom.btnStartPause.addEventListener('click', () => {
+      AudioEngine.ensureContext();
+      toggleGameRunning();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.repeat) return;
+      if (document.querySelector('dialog[open]')) return;
+      if (e.code === 'Space' && document.activeElement !== dom.btnStartPause) {
+        e.preventDefault();
+        toggleGameRunning();
+        return;
+      }
+      if (e.key in KEY_TO_LANE) {
+        e.preventDefault();
+        const lane = KEY_TO_LANE[e.key];
+        setLanePressed(lane, true);
+        handleLaneSelect(lane);
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.key in KEY_TO_LANE) {
+        setLanePressed(KEY_TO_LANE[e.key], false);
+      }
+    });
+
+    dom.fretButtons.forEach((btn) => {
+      const lane = Number(btn.dataset.lane);
+      btn.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        setLanePressed(lane, true);
+        handleLaneSelect(lane);
+      });
+      btn.addEventListener('pointerup', () => setLanePressed(lane, false));
+      btn.addEventListener('pointerleave', () => setLanePressed(lane, false));
+      btn.addEventListener('pointercancel', () => setLanePressed(lane, false));
+    });
+
+    dom.guitarLanes.forEach((laneEl) => {
+      if (!laneEl) return;
+      const lane = Number(laneEl.dataset.lane);
+      laneEl.style.cursor = 'pointer';
+      laneEl.addEventListener('pointerdown', () => {
+        setLanePressed(lane, true);
+        handleLaneSelect(lane);
+        setTimeout(() => setLanePressed(lane, false), 140);
+      });
+    });
+
+    // Initialize initial wave at y = 0% ready to jam
+    spawnWave(0);
+  </script>
+</body>
+</html>
